@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "generate_define_docment": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\yuichi_develop\\source\\repos\\generate_define_docment\\tmp\\"
+    }
+  }
+}
