@@ -6,6 +6,20 @@
 作成自体はIISでよくて、たとえば管理室から有用性を  
 認められて、社内公式サーバーに置きなおしても、ただのHTMLになっているだけなのでよいはず
 
+# 手順
+
+- node.js(gitbook-cli)
+  - 1. npm intall gitbook-cli -g
+  - 2. gitbook --version
+    
+- generate_define_docment_app
+  - 1. {App} {テーブル定義書が格納されているフォルダ}
+  - 2. 指定フォルダ（引数）内にあるテーブル定義書すべてをGitBook形式のマークダウンファイルに変換します
+  - 3. 出力された"markdown"フォルダを以下のコマンドでHTML形式にすることでツールの完成です。
+    - "gitbook build"
+  - 4. 任意の場所に出力されたHTML形式のフォルダをデプロイすれば完成
+
+
 # 構成
 
 - テーブル定義取込

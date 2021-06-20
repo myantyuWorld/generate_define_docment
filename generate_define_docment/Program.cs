@@ -15,6 +15,7 @@ namespace generate_define_docment
             var _directoryInfo = new Model.DirectoryInfo
             {
                 Files = Directory.GetFiles(_excelDirectoryPath),
+                TargetDirectoryPath = Directory.GetCurrentDirectory() + "\\markdown"
             };
             tableDefineService.DirectoryInfo = _directoryInfo;
 
@@ -22,11 +23,21 @@ namespace generate_define_docment
             tableDefineService.ConvertTableDefineDocment();
 
             // "FileInfo"オブジェクトを1ファイルずつマークダウンに変換します
-            tableDefineService.GenerateMarkDownFileByTable(Directory.GetCurrentDirectory() + "\\markdown");
+            tableDefineService.GenerateMarkDownFileByTable();
 
-            // TODO GitBook形式用に変換する
-            
+            // gitbook形式で必要な、README.md, SUMMARY.mdを作成する処理
+            tableDefineService.GenerateReadmeForGitBook();
+            tableDefineService.GenerateSummaryForGitBook();
 
+            Console.WriteLine("  #####   ##  ##    ####     ####     ####     #####    #####");
+            Console.WriteLine(" ##       ##  ##   ##  ##   ##  ##   ##  ##   ##       ##");
+            Console.WriteLine("  #####   ##  ##   ##       ##       ######    #####    #####");
+            Console.WriteLine("      ##  ##  ##   ##  ##   ##  ##   ##            ##       ##");
+            Console.WriteLine(" ######    ######   ####     ####     #####   ######   ######");
+
+            Console.WriteLine("end...");
+            Console.WriteLine("終了するには何か入力してください...");
+            Console.ReadKey();
         }
     }
 }

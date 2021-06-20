@@ -25,8 +25,16 @@ namespace generate_define_docment.Service
         public void ConvertTableDefineDocment()
         {
             var fileList = new List<FIleInfo>();
-            foreach(var _excelFile in this.DirectoryInfo.Files)
+            Console.WriteLine("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+            Console.WriteLine("エクセルファイル読み込み処理を開始します...");
+            Console.WriteLine("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+            char[] bars = { '／', '―', '＼', '｜' };
+            Console.WriteLine("");
+            int cnt = 1;
+            int parcent = 100 / this.DirectoryInfo.Files.Length;
+            foreach (var _excelFile in this.DirectoryInfo.Files)
             {
+
                 var fileInfo = new FIleInfo
                 {
                     Columns = new Dictionary<string, string>()
@@ -36,10 +44,19 @@ namespace generate_define_docment.Service
                 var _sheet = _workbook.Worksheet("テーブルカラム");
                 var _physicTableName = _sheet.Cell(PHYSIC_TABLE_NAME_CELL);
                 var _logicalTableName = _sheet.Cell(LOGICAL_TABLE_NAME_CELL);
+                // カーソル位置を初期化
+                Console.SetCursorPosition(0, Console.CursorTop);
 
                 fileInfo.PhysicsTableName = _physicTableName.GetString();
                 fileInfo.LogicalTableName = _logicalTableName.GetString();
 
+                // 回転する棒を表示
+                Console.Write(bars[cnt % 4]);
+                // 進むパーセンテージを表示
+                Console.Write("    ____{0} / {1}___ {2} を処理中...", cnt, this.DirectoryInfo.Files.Length, _physicTableName.GetString());
+                Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
+
+                cnt++;
                 var _physicColumns = _sheet.Columns(START_PHYSIC_TABLE_COLUMN_NAME_CELL);
                 var index = 1;
                 foreach(var cel in _physicColumns.Cells())
@@ -64,11 +81,26 @@ namespace generate_define_docment.Service
         /// <summary>
         /// 解析したテーブル定義情報を使用し、テーブル定義1ファイルごとに、１マークダウンファイルを作成します
         /// </summary>
-        public void GenerateMarkDownFileByTable(string targetDirectory)
+        public void GenerateMarkDownFileByTable()
         {
+            Console.WriteLine("");
+            Console.WriteLine("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
+            Console.WriteLine("マークダウンファイル化処理を開始します...");
+            Console.WriteLine("_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/");
             Encoding enc = Encoding.GetEncoding("utf-8");
+            char[] bars = { '／', '―', '＼', '｜' };
+            Console.WriteLine("");
+            int cnt = 1;
+            int parcent = 100 / this.DirectoryInfo.FileInfos.Count;
             this.DirectoryInfo.FileInfos.ForEach(fileInfo => {
-                using (StreamWriter writer = new StreamWriter(targetDirectory + string.Format("/テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName,fileInfo.LogicalTableName), false, enc))
+                // 回転する棒を表示
+                Console.Write(bars[cnt % 4]);
+                // 進むパーセンテージを表示
+                Console.Write("    ____{0} / {1} を処理中...", cnt, this.DirectoryInfo.FileInfos.Count);
+                Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
+
+                cnt++;
+                using (StreamWriter writer = new StreamWriter(this.DirectoryInfo.TargetDirectoryPath+ string.Format("/テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName,fileInfo.LogicalTableName), false, enc))
                 {
                     writer.WriteLine("#  {0} _ {1}", fileInfo.PhysicsTableName, fileInfo.LogicalTableName);
                     writer.WriteLine("  ");
@@ -86,8 +118,42 @@ namespace generate_define_docment.Service
                         }
                     }
                 }
+                // カーソル位置を初期化
+                Console.SetCursorPosition(0, Console.CursorTop);
+                // （進行が見えるように）処理を100ミリ秒間休止
+                System.Threading.Thread.Sleep(1000);
             });
+            Console.WriteLine("");
+            Console.WriteLine("");
         }
+
+        /// <summary>
+        /// [gitbook用]README.md作成処理
+        /// </summary>
+        public void GenerateReadmeForGitBook()
+        {
+            Encoding enc = Encoding.GetEncoding("utf-8");
+            using (StreamWriter writer = new StreamWriter(this.DirectoryInfo.TargetDirectoryPath + string.Format("/README.md"), false, enc))
+            {
+                writer.WriteLine("#  Instruction");
+            }
+        }
+
+        public void GenerateSummaryForGitBook()
+        {
+            Encoding enc = Encoding.GetEncoding("utf-8");
+
+            using (StreamWriter writer = new StreamWriter(this.DirectoryInfo.TargetDirectoryPath + string.Format("/SUMMARY.md"), false, enc))
+            {
+                writer.WriteLine("#  Summary  ");
+                this.DirectoryInfo.FileInfos.ForEach(fileInfo =>
+                {
+                    writer.WriteLine("* [{0}]({1})", string.Format("テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName, fileInfo.LogicalTableName), string.Format("テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName, fileInfo.LogicalTableName));
+                });
+            }
+        }
+
+
 
         /// <summary>
         /// ファイルが開いているか否かをチェックする
