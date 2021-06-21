@@ -9,10 +9,10 @@ namespace generate_define_docment.Service
 {
     class TableDefineService
     {
-        private const string PHYSIC_TABLE_NAME_CELL = "B3";
-        private const string LOGICAL_TABLE_NAME_CELL = "C3";
-        private const string START_PHYSIC_TABLE_COLUMN_NAME_CELL = "B";
-        private const string START_LOGICAL_TABLE_COLUMN_NAME_CELL = "C";
+        private const string PHYSIC_TABLE_NAME_CELL = "G3";
+        private const string LOGICAL_TABLE_NAME_CELL = "N3";
+        private const string START_PHYSIC_TABLE_COLUMN_NAME_CELL = "E";
+        private const string START_LOGICAL_TABLE_COLUMN_NAME_CELL = "F";
 
         /// <summary>
         /// field
@@ -41,14 +41,22 @@ namespace generate_define_docment.Service
                 };
                 // TODO ファイル開いていないかチェックする
                 var _workbook = new XLWorkbook(_excelFile);
-                var _sheet = _workbook.Worksheet("テーブルカラム");
+                var _sheet = _workbook.Worksheet("テーブルレイアウト");
                 var _physicTableName = _sheet.Cell(PHYSIC_TABLE_NAME_CELL);
                 var _logicalTableName = _sheet.Cell(LOGICAL_TABLE_NAME_CELL);
                 // カーソル位置を初期化
                 Console.SetCursorPosition(0, Console.CursorTop);
 
-                fileInfo.PhysicsTableName = _physicTableName.GetString();
-                fileInfo.LogicalTableName = _logicalTableName.GetString();
+                try
+                {
+
+                    fileInfo.PhysicsTableName = _physicTableName.GetString();
+                    fileInfo.LogicalTableName = _logicalTableName.GetString();
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
 
                 // 回転する棒を表示
                 Console.Write(bars[cnt % 4]);
@@ -68,9 +76,9 @@ namespace generate_define_docment.Service
                         continue;
                     }
                     var row = cel.Address.RowNumber;
-                    if (!fileInfo.Columns.ContainsKey(_sheet.Cell("B" + row).GetString()))
+                    if (!fileInfo.Columns.ContainsKey(_sheet.Cell("E" + row).GetString()))
                     {
-                        fileInfo.Columns.Add(_sheet.Cell("B"+row).GetString(), _sheet.Cell("C" + row).GetString());
+                        fileInfo.Columns.Add(_sheet.Cell("E"+row).GetString(), _sheet.Cell("F" + row).GetString());
                     }
                 }
                 fileList.Add(fileInfo);
