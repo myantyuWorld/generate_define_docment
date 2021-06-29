@@ -35,53 +35,51 @@ namespace generate_define_docment.Service
             foreach (var _excelFile in this.DirectoryInfo.Files)
             {
 
-                var fileInfo = new FIleInfo
-                {
-                    Columns = new Dictionary<string, string>()
-                };
-                // TODO ファイル開いていないかチェックする
-                var _workbook = new XLWorkbook(_excelFile);
-                var _sheet = _workbook.Worksheet("テーブルレイアウト");
-                var _physicTableName = _sheet.Cell(PHYSIC_TABLE_NAME_CELL);
-                var _logicalTableName = _sheet.Cell(LOGICAL_TABLE_NAME_CELL);
-                // カーソル位置を初期化
-                Console.SetCursorPosition(0, Console.CursorTop);
+                    var fileInfo = new FIleInfo
+                    {
+                        Columns = new Dictionary<string, string>()
+                    };
+                    try
+                    {
+                        // TODO ファイル開いていないかチェックする
+                        var _workbook = new XLWorkbook(_excelFile);
+                        var _sheet = _workbook.Worksheet("テーブルレイアウト");
+                        var _physicTableName = _sheet.Cell(PHYSIC_TABLE_NAME_CELL);
+                        var _logicalTableName = _sheet.Cell(LOGICAL_TABLE_NAME_CELL);
+                        // カーソル位置を初期化
+                        Console.SetCursorPosition(0, Console.CursorTop);
+                            fileInfo.PhysicsTableName = _physicTableName.GetString();
+                            fileInfo.LogicalTableName = _logicalTableName.GetString();
 
-                try
-                {
+                    // 回転する棒を表示
+                    Console.Write(bars[cnt % 4]);
+                    // 進むパーセンテージを表示
+                    Console.Write("    ____{0} / {1}___ {2} を処理中...", cnt, this.DirectoryInfo.Files.Length, _physicTableName.GetString());
+                    Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
 
-                    fileInfo.PhysicsTableName = _physicTableName.GetString();
-                    fileInfo.LogicalTableName = _logicalTableName.GetString();
+                    cnt++;
+                    var _physicColumns = _sheet.Columns(START_PHYSIC_TABLE_COLUMN_NAME_CELL);
+                    var index = 1;
+                    foreach(var cel in _physicColumns.Cells())
+                    {
+                        var val = cel.GetValue<string>();
+                        // テーブルカラム開始位置以前　または、テーブルカラムの値が空文字の場合はスキップ
+                        if (index++ < 4 || string.IsNullOrEmpty(val))
+                        {
+                            continue;
+                        }
+                        var row = cel.Address.RowNumber;
+                        if (!fileInfo.Columns.ContainsKey(_sheet.Cell("E" + row).GetString()))
+                        {
+                            fileInfo.Columns.Add(_sheet.Cell("E"+row).GetString(), _sheet.Cell("F" + row).GetString());
+                        }
+                    }
+                    fileList.Add(fileInfo);
                 }
                 catch (Exception)
                 {
                     continue;
                 }
-
-                // 回転する棒を表示
-                Console.Write(bars[cnt % 4]);
-                // 進むパーセンテージを表示
-                Console.Write("    ____{0} / {1}___ {2} を処理中...", cnt, this.DirectoryInfo.Files.Length, _physicTableName.GetString());
-                Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
-
-                cnt++;
-                var _physicColumns = _sheet.Columns(START_PHYSIC_TABLE_COLUMN_NAME_CELL);
-                var index = 1;
-                foreach(var cel in _physicColumns.Cells())
-                {
-                    var val = cel.GetValue<string>();
-                    // テーブルカラム開始位置以前　または、テーブルカラムの値が空文字の場合はスキップ
-                    if (index++ < 4 || string.IsNullOrEmpty(val))
-                    {
-                        continue;
-                    }
-                    var row = cel.Address.RowNumber;
-                    if (!fileInfo.Columns.ContainsKey(_sheet.Cell("E" + row).GetString()))
-                    {
-                        fileInfo.Columns.Add(_sheet.Cell("E"+row).GetString(), _sheet.Cell("F" + row).GetString());
-                    }
-                }
-                fileList.Add(fileInfo);
             }
             this.DirectoryInfo.FileInfos = fileList;
         }
