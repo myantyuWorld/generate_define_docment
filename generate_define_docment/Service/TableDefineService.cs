@@ -44,37 +44,42 @@ namespace generate_define_docment.Service
                         // TODO ファイル開いていないかチェックする
                         var _workbook = new XLWorkbook(_excelFile);
                         var _sheet = _workbook.Worksheet("テーブルレイアウト");
+                        if (_sheet == null)
+                        {
+                            continue;
+                        }    
+
                         var _physicTableName = _sheet.Cell(PHYSIC_TABLE_NAME_CELL);
                         var _logicalTableName = _sheet.Cell(LOGICAL_TABLE_NAME_CELL);
                         // カーソル位置を初期化
                         Console.SetCursorPosition(0, Console.CursorTop);
-                            fileInfo.PhysicsTableName = _physicTableName.GetString();
-                            fileInfo.LogicalTableName = _logicalTableName.GetString();
+                        fileInfo.PhysicsTableName = _physicTableName.GetString();
+                        fileInfo.LogicalTableName = _logicalTableName.GetString();
 
-                    // 回転する棒を表示
-                    Console.Write(bars[cnt % 4]);
-                    // 進むパーセンテージを表示
-                    Console.Write("    ____{0} / {1}___ {2} を処理中...", cnt, this.DirectoryInfo.Files.Length, _physicTableName.GetString());
-                    Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
+                        // 回転する棒を表示
+                        Console.Write(bars[cnt % 4]);
+                        // 進むパーセンテージを表示
+                        Console.Write("    ____{0} / {1}___ {2} を処理中...", cnt, this.DirectoryInfo.Files.Length, _physicTableName.GetString());
+                        Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
 
-                    cnt++;
-                    var _physicColumns = _sheet.Columns(START_PHYSIC_TABLE_COLUMN_NAME_CELL);
-                    var index = 1;
-                    foreach(var cel in _physicColumns.Cells())
-                    {
-                        var val = cel.GetValue<string>();
-                        // テーブルカラム開始位置以前　または、テーブルカラムの値が空文字の場合はスキップ
-                        if (index++ < 4 || string.IsNullOrEmpty(val))
+                        cnt++;
+                        var _physicColumns = _sheet.Columns(START_PHYSIC_TABLE_COLUMN_NAME_CELL);
+                        var index = 1;
+                        foreach(var cel in _physicColumns.Cells())
                         {
-                            continue;
+                            var val = cel.GetValue<string>();
+                            // テーブルカラム開始位置以前　または、テーブルカラムの値が空文字の場合はスキップ
+                            if (index++ < 4 || string.IsNullOrEmpty(val))
+                            {
+                                continue;
+                            }
+                            var row = cel.Address.RowNumber;
+                            if (!fileInfo.Columns.ContainsKey(_sheet.Cell("E" + row).GetString()))
+                            {
+                                fileInfo.Columns.Add(_sheet.Cell("E"+row).GetString(), _sheet.Cell("F" + row).GetString());
+                            }
                         }
-                        var row = cel.Address.RowNumber;
-                        if (!fileInfo.Columns.ContainsKey(_sheet.Cell("E" + row).GetString()))
-                        {
-                            fileInfo.Columns.Add(_sheet.Cell("E"+row).GetString(), _sheet.Cell("F" + row).GetString());
-                        }
-                    }
-                    fileList.Add(fileInfo);
+                        fileList.Add(fileInfo);
                 }
                 catch (Exception)
                 {
@@ -106,7 +111,7 @@ namespace generate_define_docment.Service
                 Console.Write("{0, 4:d0}%", parcent * cnt >= 100 ? 100 : parcent * cnt);
 
                 cnt++;
-                using (StreamWriter writer = new StreamWriter(this.DirectoryInfo.TargetDirectoryPath+ string.Format("/テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName,fileInfo.LogicalTableName), false, enc))
+                using (StreamWriter writer = new StreamWriter(this.DirectoryInfo.TargetDirectoryPath + string.Format("/テーブル定義_{0}_{1}.md", fileInfo.PhysicsTableName,fileInfo.LogicalTableName), false, enc))
                 {
                     writer.WriteLine("#  {0} _ {1}", fileInfo.PhysicsTableName, fileInfo.LogicalTableName);
                     writer.WriteLine("  ");
